@@ -4,8 +4,8 @@ uvicorn[standard]==0.24.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 
-# Data processing
-pandas==2.1.4
+# Data processing - Compatible with older Python
+pandas==1.5.3  # Downgraded from 2.1.4
 numpy==1.24.3
 scikit-learn==1.3.2
 
