@@ -8,6 +8,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    networks:
+      - carsafe-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -16,31 +18,98 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
+    networks:
+      - carsafe-network
 
   postgres:
-    image: postgres:14
+    image: postgres:14-alpine
     environment:
-      POSTGRES_DB: vehicledata
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: carsafe
+      POSTGRES_USER: carsafe_user
+      POSTGRES_PASSWORD: carsafe_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - carsafe-network
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_EMAIL: admin@carsafe.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
     depends_on:
       - postgres
+    networks:
+      - carsafe-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://carsafe_user:carsafe_password@postgres:5432/carsafe
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - carsafe-network
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      API_URL: http://api:8000
+    depends_on:
+      - api
+    networks:
+      - carsafe-network
+
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    command: python -m src.kafka_client.producer
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - carsafe-network
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    command: python -m src.kafka_client.consumer
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      DATABASE_URL: postgresql://carsafe_user:carsafe_password@postgres:5432/carsafe
+    depends_on:
+      - kafka
+      - postgres
+    networks:
+      - carsafe-network
+
+networks:
+  carsafe-network:
+    driver: bridge
 
 volumes:
   postgres_data:
