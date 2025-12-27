@@ -3,7 +3,7 @@ import requests
 import time
 import random
 from datetime import datetime
-from .can_bus_simulator import CANBusSimulator
+from can_bus_simulator import CANBusSimulator
 
 BASE_URL = "http://localhost:8000"
 
