@@ -1,6 +1,18 @@
 # 🚗 CarSafe - Vehicle Telemetry Monitoring System
+![Python](https://img.shields.io/badge/Python-3.8+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
+![Kafka](https://img.shields.io/badge/Kafka-Streaming-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-A real-time vehicle data pipeline with anomaly detection, built with FastAPI, Kafka, and Streamlit.
+A real-time vehicle telemetry pipeline featuring anomaly detection, live dashboards, and scalable event streaming — powered by FastAPI, Kafka, PostgreSQL, and Streamlit.
+
+
+
+## 📸 Demo
+
+*(Add a screenshot or GIF of your dashboard here)*  
+
 
 ## 📋 Features
 
@@ -33,22 +45,22 @@ A real-time vehicle data pipeline with anomaly detection, built with FastAPI, Ka
 
 ## 🚀 Quick Start
 
-## 🧰 Prerequisites
+### 🧰 Prerequisites
 - Python 3.8+
 - pip or Poetry
 - PostgreSQL (optional for demo mode)
 - Kafka (optional, only required for streaming mode)
 
 
-### Installation
+## Installation
 
-1. **Clone and setup:**
+**Clone and setup:**
 ```bash
 cd CarSafe
 python -m venv venv
 .\venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-
+```
 ## ▶️ Running the Services
 
 ### Start the API
@@ -56,3 +68,16 @@ pip install -r requirements.txt
 uvicorn api.main:app --reload
 python generator/main.py (Start the Data Generator)
 streamlit run dashboard/app.py (Start the Dashboard)
+```
+## 🔌 API Documentation
+
+Once the API is running:
+
+- Swagger UI → http://localhost:8000/docs  
+- ReDoc → http://localhost:8000/redoc  
+
+## 🐳 Docker (Optional)
+
+```bash
+docker-compose up --build
+
